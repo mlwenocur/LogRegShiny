@@ -1,0 +1,51 @@
+library(shiny)
+library(UsingR)
+require("reshape2")
+require("ggplot2")
+require('grid')
+
+probForLinear <- function(x) (1 + exp(2  - 0.5 * x - 0.1 * x^2)) ^ -1
+set.seed(123);
+
+genLinModSampData <- function(nSamps, minX = 0.3, maxX = 5){
+    X <- runif(nSamps, minX, maxX); 
+    X2 <- X^2
+    yVals <- sapply(X, function(x){rbinom(1, 1, probForLinear(x))})
+    z = data.frame(yVals = yVals, X = X, X2 = X2)
+    return(z)
+}
+
+GetEmpiricalQuantities <- function(dFrame){
+    mod1 <- glm(yVals ~ X + X2, family = binomial, dFrame)
+    X <- dFrame$X
+    cfs <- coefficients(mod1)
+    fmt <- paste0('Fitted Coefficients: %4.3f %4.3f %4.3f',
+                  ' vs actual: -2.000 0.500 0.100')
+    empir_VS_actual <- sprintf(fmt, cfs[1], cfs[2], cfs[3])
+    fitRho <- cfs[1] + cfs[2] * X + cfs[3] * X^2; 
+    fitProb <- (1 + exp(-fitRho)) ^ -1
+    return(list(summaryString = empir_VS_actual, fitProb = fitProb))
+}
+
+GenPlotFromX <- function(samples, empirQuants){
+    X <- samples$X
+    fitProb <- empirQuants$fitProb
+    probCmp <- melt(data.frame(X, fitProb, exactProb = prob(X)), id = "X")
+    ggplot(data = probCmp, aes(x = X, y = value, color = variable)) + 
+        geom_line(size = 1.5) + 
+        coord_fixed(ratio = 5) + 
+        labs(x='Debt to Income Ratio', y = 'Probability of Default')
+}
+
+shinyServer(function(input, output) {
+    output$trialSamples <- renderPrint({input$sampsPerTrial})
+    output$newHist <- renderPlot({
+        samples <- genLinModSampData(input$sampsPerTrial)
+        empirQuants <- GetEmpiricalQuantities(samples)
+        graph <- GenPlotFromX(samples, empirQuants)
+        graph
+    })
+    
+})
+
+
