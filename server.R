@@ -20,7 +20,7 @@ GetEmpiricalQuantities <- function(dFrame){
     X <- dFrame$X
     cfs <- coefficients(mod1)
     fmt <- paste0('Fitted Coefficients: %4.3f %4.3f %4.3f',
-                  ' vs actual: -2.000 0.500 0.100')
+                  '\n                     actual: -2.000 0.500 0.100')
     empir_VS_actual <- sprintf(fmt, cfs[1], cfs[2], cfs[3])
     fitRho <- cfs[1] + cfs[2] * X + cfs[3] * X^2; 
     fitProb <- (1 + exp(-fitRho)) ^ -1
@@ -28,13 +28,18 @@ GetEmpiricalQuantities <- function(dFrame){
 }
 
 GenPlotFromX <- function(samples, empirQuants){
+    summaryText <- empirQuants$summaryString
+    my_grob = grobTree(textGrob(summaryText, x = 0.25, y = 0.1, hjust=0, 
+                                gp = gpar(col = "blue", fontsize = 12, 
+                                          fontface = "italic")))
     X <- samples$X
     fitProb <- empirQuants$fitProb
     probCmp <- melt(data.frame(X, fitProb, exactProb = prob(X)), id = "X")
     ggplot(data = probCmp, aes(x = X, y = value, color = variable)) + 
         geom_line(size = 1.5) + 
         coord_fixed(ratio = 5) + 
-        labs(x='Debt to Income Ratio', y = 'Probability of Default')
+        labs(x='Debt to Income Ratio', y = 'Probability of Default') +
+        annotation_custom(my_grob)    
 }
 
 shinyServer(function(input, output) {
