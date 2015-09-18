@@ -15,7 +15,6 @@ GraphProbAndRho <- function(funcs, mn, mx, by = 0.01, plotIt = FALSE){
     p1 <- ggplot(df, aes(x,logOdds)) + geom_line() + ggtitle('Log(odds) as a function of x')
     graphList <- list(probPlot = p, rhoPlot = p1)
     if (plotIt) grid.arrange(ga$probPlot, ga$rhoPlot, ncol=2)
-    
     return(graphList)
 }
 # Generate a power function object
@@ -216,6 +215,10 @@ RegressorFuncsGen <- function(funcList, wts = rep(1, length(funcList))){
         p <- (1 + exp(-linearTerm))^ {-1}
         return(p)   
     }
+    GetCoefficients <- function(){
+        v <- sapply(funcList, function(f)f$getCoef())
+        return(v)
+    }
     SetFixedValues <- function(fixVals){
         v <- sapply(funcList, function(f)f$setVal(fixVals))
     }
@@ -226,7 +229,8 @@ RegressorFuncsGen <- function(funcList, wts = rep(1, length(funcList))){
              GenProbFromCoVars = GenProbFromCoVars,
              ResetFixedVals = ResetFixedVals,
              SetFixedValues = SetFixedValues,
-             GetCovStatus = GetCovStatus))
+             GetCovStatus = GetCovStatus,
+             GetCoefficients = GetCoefficients))
 }
 
 PostProcessModel <- function(lmd, modelFuncs, gatherConfIntStats = TRUE)
@@ -311,11 +315,7 @@ CreateSampleSession <- function(cfs = c(2, 1, 0.5)){
                                  NA)#interactData)
     
     farray <- list(jSin, jCos, jCos2, jSin2)#, myFactor)
-    #return(farray)
     simFunc <- RegressorFuncsGen(farray)
-    #return(simFunc)
-    x <- 1
-    xVals <- simFunc$GenCovariates(x)
     return(simFunc)
     
     
