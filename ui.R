@@ -11,7 +11,8 @@ shinyUI(pageWithSidebar(
         submitButton('Submit')
     ),
     mainPanel(
-        verbatimTextOutput('trialSamples'),
+        textOutput('trialSamples'),
+        textOutput('modelHeader'),
         plotOutput('newHist'),
         plotOutput('newRho')
     )

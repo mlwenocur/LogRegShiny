@@ -65,8 +65,15 @@ GenRhoPlotFromX <- function(samples, empirQuants){
 shinyServer(function(input, output) {
     samples <- NULL
     empirQuants <- NULL
-
-    output$trialSamples <- renderPrint({paste('Num samples per trial', input$sampsPerTrial)})
+    defModelDescr <- "Model: rho(x) = -2  + 0.5 * x + 0.1 * x^2"
+    harmModDescr <- "Model: rho(x) = sin(x) + cos(x) + 2cos(2x) + 2sin(2x)"
+    
+    output$trialSamples <- renderPrint({cat(
+        paste('Samples per trial =', input$sampsPerTrial))
+        })
+    output$modelHeader <- renderPrint({cat(
+        ifelse(input$selectedModel == 'poly', defModelDescr, harmModDescr))
+    })
     output$newHist <- renderPlot({
         samples <<- genLinModSampData(input$sampsPerTrial)
         empirQuants <<- GetEmpiricalQuantities(samples)
