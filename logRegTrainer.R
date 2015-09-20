@@ -126,9 +126,11 @@ SimLogRegTrials <- function(generators, minx, maxx, numTrials, seqLen,
         }
         if (noIntercept == FALSE){
             model <- glm(data = xt, yVals ~ ., family = binomial)
+            extMod <- list(X = z, model = model)
         }
         else {
             model <- glm(data = xt, yVals ~ . - 1, family = binomial)
+            extMod <- list(X = z, model = model)
         }
     })
     return(models)
@@ -289,7 +291,7 @@ PostProcessAllModels <- function(models, modelFuncs, gatherConfIntStats = TRUE){
     return(cbind(classPerf, cfData))
 }
 
-CreateSampleSession <- function(cfs = c(2, 1, 0.5)){
+CreateSampleSession <- function(cfs = c(1, 3, 2, 4)){
     jRoot <- CreatePowerFunc(0.5, cfs[1])
     jRootL <- list(score = jRoot, cof = -0.5)
     
@@ -301,10 +303,10 @@ CreateSampleSession <- function(cfs = c(2, 1, 0.5)){
     
     interactData <- list(jRootL, jSqrL)
     
-    jCos  <- CreateCosFunc(1, 1)
-    jSin  <- CreateSinFunc(1, 1)
-    jCos2 <- CreateCosFunc(2, 2)
-    jSin2 <- CreateSinFunc(2, 2)
+    jSin  <- CreateCosFunc(1, cfs[1])
+    jCos  <- CreateSinFunc(1, cfs[2])
+    jSin2 <- CreateCosFunc(2, cfs[3])
+    jCos2 <- CreateSinFunc(2, cfs[4])
     jExp  <- CreateExpoFunc(-1, 2)
     jCube <- CreatePowerFunc(3, cfs[3])
     
@@ -314,7 +316,7 @@ CreateSampleSession <- function(cfs = c(2, 1, 0.5)){
     myFactor <- DefineFactorFunc(facName, 1:2, factorProbs[1:2], factorWts,
                                  NA)#interactData)
     
-    farray <- list(jSin, jCos, jCos2, jSin2)#, myFactor)
+    farray <- list(jSin, jCos, jSin2, jCos2)#, myFactor)
     simFunc <- RegressorFuncsGen(farray)
     return(simFunc)
     

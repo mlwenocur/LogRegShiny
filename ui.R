@@ -3,11 +3,13 @@ library(shiny)
 shinyUI(pageWithSidebar(
     headerPanel('Logistic Regression Trainer'),
     sidebarPanel(
+        numericInput('minX', 'Input X min value', 0.3),
+        numericInput('maxX', 'Input X max value', 5),
         numericInput('sampsPerTrial', 'Input number of samples per trial', 100, min=20, max =20000, step = 10),
         selectInput('selectedModel', 'Model Selector',
                            c('Polynomial Model' = 'poly',
                              'Harmonic Model' = 'harmonic'),
-                           'harmonic'),
+                           'poly'),
         submitButton('Submit')
     ),
     mainPanel(
