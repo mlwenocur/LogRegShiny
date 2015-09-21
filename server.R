@@ -20,8 +20,8 @@ yHarmRhoLabel <- 'Log Odds of Calling In Sick'
 
 set.seed(123);
 
-GenLinModSampData <- function(nSamps, minX = 0.3, maxX = 5){
-    set.seed(123)
+GenLinModSampData <- function(nSamps, minX = 0.3, maxX = 5, userSeed){
+    set.seed(userSeed)
     X <- runif(nSamps, minX, maxX); 
     X2 <- X^2
     yVals <- sapply(X, function(x){rbinom(1, 1, ProbForLinear(x))})
@@ -134,8 +134,8 @@ shinyServer(function(input, output) {
             yProbLabel <<- yPolyProbLabel
             yRhoLabel <<- yPolyRhoLabel
             
-            samples <<- GenLinModSampData(input$sampsPerTrial,
-                                          input$minX, input$maxX)
+            samples <<- GenLinModSampData(input$sampsPerTrial, input$minX, 
+                                          input$maxX, input$userSeed)
             empirQuants <<- GetEmpiricalQuantities(samples)
         }
         else {
@@ -144,7 +144,8 @@ shinyServer(function(input, output) {
             yRhoLabel <<- yHarmRhoLabel
             modelFunc <- CreateSampleSession()
             extMods <- SimLogRegTrials(modelFunc, input$minX, input$maxX, 
-                                       1, input$sampsPerTrial)
+                                       1, input$sampsPerTrial,
+                                       seed = input$userSeed)
             empirQuants <<- GetEmpQuantsHarmonic(extMods)
             samples <<- GetHarmModSampData(extMods)
         }
