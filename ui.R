@@ -10,13 +10,15 @@ shinyUI(pageWithSidebar(
                            c('Polynomial Model' = 'poly',
                              'Harmonic Model' = 'harmonic'),
                            'poly'),
+        selectInput('grView', 'Graph Type', c('Log Odds Graph' = 'rho',
+                                              'Probability Graph' = 'prob'), 
+                    'prob'),
         submitButton('Submit')
     ),
     mainPanel(
         textOutput('trialSamples'),
         textOutput('modelHeader'),
-        plotOutput('newHist'),
-        plotOutput('newRho')
+        plotOutput('newHist')
     )
     
 ))

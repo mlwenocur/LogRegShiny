@@ -21,6 +21,7 @@ yHarmRhoLabel <- 'Log Odds of Calling In Sick'
 set.seed(123);
 
 GenLinModSampData <- function(nSamps, minX = 0.3, maxX = 5){
+    set.seed(123)
     X <- runif(nSamps, minX, maxX); 
     X2 <- X^2
     yVals <- sapply(X, function(x){rbinom(1, 1, ProbForLinear(x))})
@@ -40,8 +41,8 @@ GetEmpiricalQuantities <- function(dFrame){
     mod1 <- glm(yVals ~ X + X2, family = binomial, dFrame)
     X <- dFrame$X
     cfs <- coefficients(mod1)
-    fmt <- paste0('Fitted Coefficients: %4.3f %4.3f %4.3f',
-                  '\n                     actual: -2.000 0.500 0.100')
+    fmt <- paste0('Fitted Coefficients: %3.2f %3.2f %3.2f',
+                  '\n                     actual: -2.00 0.50 0.10')
     empir_VS_actual <- sprintf(fmt, cfs[1], cfs[2], cfs[3])
     fitRho <- cfs[1] + cfs[2] * X + cfs[3] * X^2; 
     fitProb <- (1 + exp(-fitRho)) ^ -1
@@ -54,7 +55,7 @@ GetEmpQuantsHarmonic <- function(extMods){
     mod <- extMods[[1]]$model
     X <- extMods[[1]]$X
     cfs <- coefficients(mod)
-    fmt <- paste0('Fitted Coefficients: %4.3f %4.3f %4.3f %4.3f',
+    fmt <- paste0('Fitted Coefficients: %3.2f %3.2f %3.2f %3.2f',
                   '\n                     actual: 1.00 3.00 2.00 4.00')   
     empir_VS_actual <- sprintf(fmt, cfs[1], cfs[2], cfs[3], cfs[4])
     #fitProb <- mod$fitted.values
@@ -76,10 +77,15 @@ GenProbPlotFromX <- function(samples, empirQuants, xlabel, ylabel){
     X <- samples$X
     fittedProb <- empirQuants$fitProb
     exactProb <- empirQuants$exactProb
+    ratio.display <- 1
+    rangeY <- max(fittedProb)-min(fittedProb)
+    rangeY <- max(rangeY, max(exactProb) - min(exactProb))
+    ratio.values <- (max(X)-min(X))/rangeY
     probCmp <- melt(data.frame(X, fittedProb, exactProb), id = "X")
     ggplot(data = probCmp, aes(x = X, y = value, color = variable)) + 
         geom_line(size = 1.5) + coord_fixed(ratio = 5) + 
-        labs(x = xlabel, y = ylabel) + annotation_custom(my_grob)    
+        labs(x = xlabel, y = ylabel) + annotation_custom(my_grob)  +
+        coord_fixed(ratio.values / ratio.display) 
 }
 
 GenRhoPlotFromX <- function(samples, empirQuants, xlabel, ylabel){
@@ -90,12 +96,18 @@ GenRhoPlotFromX <- function(samples, empirQuants, xlabel, ylabel){
     X <- samples$X
     fittedRho <- empirQuants$fitRho
     exactRho <- empirQuants$exactRho
+    ratio.display <- 1
+    rangeY <- max(fittedRho)-min(fittedRho)
+    rangeY <- max(rangeY, max(exactRho) - min(exactRho))
+    ratio.values <- (max(X)-min(X))/rangeY
     rhoCmp <- melt(data.frame(X, fittedRho, exactRho), id = "X")
     ggplot(data = rhoCmp, aes(x = X, y = value, color = variable)) + 
         geom_line(size = 1.5) + 
         coord_fixed(ratio = 1) + 
         labs(x=xlabel, y = ylabel) +
-        annotation_custom(my_grob)    
+        annotation_custom(my_grob) +
+        coord_fixed(ratio.values / ratio.display)
+       
 }
 
 shinyServer(function(input, output) {
@@ -136,21 +148,17 @@ shinyServer(function(input, output) {
             empirQuants <<- GetEmpQuantsHarmonic(extMods)
             samples <<- GetHarmModSampData(extMods)
         }
-        probGraph <- GenProbPlotFromX(samples, empirQuants, 
-                                      xLabel, yRhoLabel)
-        probGraph
-        
-    })
-    output$newRho <- renderPlot({
-        if (input$selectedModel == 'poly') {
-            z <- input$sampsPerTrial * input$minX * input$maxX 
+        if (input$grView == 'prob')
+        {
+            GenProbPlotFromX(samples, empirQuants, 
+                                      xLabel, yProbLabel)
         }
-        
-        
-        rhoGraph <- GenRhoPlotFromX(samples, empirQuants, 
-                                    xLabel, yRhoLabel)
-        rhoGraph
+        else {
+            GenRhoPlotFromX(samples, empirQuants, 
+                            xLabel, yRhoLabel)
+        }
     })
+    
     
 })
 
