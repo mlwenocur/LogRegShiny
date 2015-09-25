@@ -3,18 +3,19 @@ library(shiny)
 shinyUI(pageWithSidebar(
     headerPanel('Logistic Regression Trainer'),
     sidebarPanel(
-        numericInput('userSeed', 'Input seed', 222),
-        numericInput('minX', 'Input X min value', 0.3),
-        numericInput('maxX', 'Input X max value', 5),
-        numericInput('sampsPerTrial', 'Input number of samples per trial', 100, min=20, max =20000, step = 10),
-        selectInput('selectedModel', 'Model Selector',
+        numericInput('sampsPerTrial', 'A: Input sample size', 100, min=20, max =20000, step = 10),
+        selectInput('selectedModel', 'B: Model Selector',
                            c('Polynomial Model' = 'poly',
                              'Harmonic Model' = 'harmonic'),
                            'poly'),
-        selectInput('grView', 'Graph Type', c('Log Odds Graph' = 'rho',
+        numericInput('minX', 'C: Input X min value', 0.3),
+        numericInput('maxX', 'D: Input X max value', 5),
+        numericInput('userSeed', 'E: Input seed', 222),
+        selectInput('grView', 'F: Graph Type', c('Log Odds Graph' = 'rho',
                                               'Probability Graph' = 'prob'), 
-                    'prob'),
-        submitButton('Submit')
+                    'prob'),        
+
+        submitButton('G: Submit')
     ),
     mainPanel(
         textOutput('trialSamples'),

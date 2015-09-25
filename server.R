@@ -15,8 +15,8 @@ yPolyProbLabel <- 'Prob of Default'
 yPolyRhoLabel  <- 'Log Odds of Default'
 
 xHarmLabel <- 'Cyclic Time'
-yHarmProbLabel <- 'Prob of Calling In Sick'
-yHarmRhoLabel <- 'Log Odds of Calling In Sick'
+yHarmProbLabel <- 'Prob of Cardiac Arrest'
+yHarmRhoLabel <- 'Log Odds of Cardiac Arrest'
 
 set.seed(123);
 
@@ -42,7 +42,7 @@ GetEmpiricalQuantities <- function(dFrame){
     X <- dFrame$X
     cfs <- coefficients(mod1)
     fmt <- paste0('Fitted Coefficients: %3.2f %3.2f %3.2f',
-                  '\n                     actual: -2.00 0.50 0.10')
+                  '\n                     Actual: -2.00 0.50 0.10')
     empir_VS_actual <- sprintf(fmt, cfs[1], cfs[2], cfs[3])
     fitRho <- cfs[1] + cfs[2] * X + cfs[3] * X^2; 
     fitProb <- (1 + exp(-fitRho)) ^ -1
